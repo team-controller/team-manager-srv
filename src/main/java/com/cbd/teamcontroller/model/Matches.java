@@ -38,6 +38,9 @@ public class Matches extends BaseEntity{
 	@Column(name = "callPlace")
 	private String callPlace;
 	
+	@Column(name = "status")
+	private StatusMatch status;  
+	
 	@NotBlank
 	@Column(name = "matchPlace")
 	private String matchPlace; 

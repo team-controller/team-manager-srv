@@ -11,6 +11,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.cbd.teamcontroller.model.dtos.PlayerDTO;
 import com.cbd.teamcontroller.model.mapper.UserDataMapper;
 
 import lombok.Getter;
@@ -22,9 +23,15 @@ import lombok.Setter;
 @Table(name = "player")
 public class Player extends User {
 	
-
 	private static final long serialVersionUID = 1L;
-
+	
+	public Player(PlayerDTO playerDTO) {
+		this.goalsPerMatch = playerDTO.getGoalsPerMatch();
+		this.yellowsPerMatch = playerDTO.getYellowsPerMatch();
+		this.redPerMatch = playerDTO.getRedPerMatch();
+		this.minutesPerMatch = playerDTO.getMinutesPerMatch();
+	}
+	
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<Trainings> trainings; 
 	
@@ -53,12 +60,13 @@ public class Player extends User {
 	private Integer totalReds; 
 	
 	@Column(name = "minutes_match")
-	private Integer minutesPerMatch; 
+	private Integer minutesPerMatch;
+	
+	@Column(name = "total_minutes")
+	private Integer totalMinutes; 
 	
 	public Player(UserDataMapper userData) {
 		super(userData.getUsername(), userData.getFirstName(), userData.getSecondName(), userData.getPhoneNumber(),userData.getPassword(), userData.getFechaNacimiento(), userData.getRol());
 	}
-	
-	
-	
+
 }
