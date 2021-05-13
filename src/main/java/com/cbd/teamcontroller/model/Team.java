@@ -11,6 +11,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import com.cbd.teamcontroller.model.dtos.TeamDTO;
 
@@ -41,7 +42,7 @@ public class Team extends BaseEntity{
 	@Column(name = "city")
 	private String city; 
 	
-	@NotBlank
+	@NotNull
 	@Column(name = "points")
 	private Integer points; 
 	

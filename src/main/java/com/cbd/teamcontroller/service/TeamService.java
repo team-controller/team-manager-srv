@@ -27,6 +27,11 @@ public class TeamService {
 		return res;
 	}
 
+	public Team findTeamByCoachUsername(String username) {
+		return this.teamRepository.findTeamByCoachUsername(username);
+	}
+	
+	
 	public void delete(Team t) {
 		this.teamRepository.delete(t);
 	}
