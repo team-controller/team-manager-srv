@@ -1,6 +1,8 @@
 package com.cbd.teamcontroller.controller;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -20,9 +22,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cbd.teamcontroller.model.Coach;
+import com.cbd.teamcontroller.model.Player;
 import com.cbd.teamcontroller.model.Team;
 import com.cbd.teamcontroller.model.dtos.TeamDTO;
 import com.cbd.teamcontroller.service.CoachService;
+import com.cbd.teamcontroller.service.PlayerService;
 import com.cbd.teamcontroller.service.TeamService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -36,18 +40,27 @@ public class TeamController {
 	@Autowired
 	private TeamService teamService;
 
+	@Autowired
+	private PlayerService playerService;
+
 	@GetMapping("/team/")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<Team> getTeam() {
+	public ResponseEntity<Team> getTeamByPlayer() {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
-		Coach c = coachService.findByUsername(username);
-		Team t = c.getTeam();
-		if (t != null) {
-			return ResponseEntity.ok(t);
-		} else {
-			return ResponseEntity.notFound().build();
+		Player p = playerService.findByUsername(username);
+		if (p != null) {
+			List<Team> teams = teamService.findAll();
+			if (!teams.isEmpty()) {
+				Optional<Team> t = teams.stream().filter(x -> x.getPlayers().contains(p)).findFirst();
+				Team res = null;
+				if (t.isPresent()) {
+					res = t.get();
+				}
+				return ResponseEntity.ok(res);
+			}
 		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
 
 	@PostMapping("/createTeam")

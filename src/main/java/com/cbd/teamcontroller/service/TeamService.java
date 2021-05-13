@@ -1,5 +1,6 @@
 package com.cbd.teamcontroller.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +32,12 @@ public class TeamService {
 		return this.teamRepository.findTeamByCoachUsername(username);
 	}
 	
-	
 	public void delete(Team t) {
 		this.teamRepository.delete(t);
+	}
+
+	public List<Team> findAll() {
+		return this.teamRepository.findAll();
 	}
 	
 }
