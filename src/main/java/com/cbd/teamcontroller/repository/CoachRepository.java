@@ -9,7 +9,7 @@ import com.cbd.teamcontroller.model.Coach;
 @Repository
 public interface CoachRepository extends JpaRepository<Coach, Integer> {
 
-	@Query("select c from coach c where c.username = :username")
+	@Query("select c from Coach c where c.username = :username")
 	Coach findByUsername(String username);
 
 }

@@ -9,7 +9,7 @@ import com.cbd.teamcontroller.model.Player;
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Integer>{
 
-	@Query("select p from player p where p.username = :username")
+	@Query("select p from Player p where p.username = :username")
 	Player findByUsername(String username);
 
 }
