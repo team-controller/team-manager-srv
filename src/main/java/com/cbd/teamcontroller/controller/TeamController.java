@@ -1,8 +1,11 @@
 package com.cbd.teamcontroller.controller;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -10,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,6 +29,7 @@ import com.cbd.teamcontroller.model.Coach;
 import com.cbd.teamcontroller.model.Player;
 import com.cbd.teamcontroller.model.Team;
 import com.cbd.teamcontroller.model.dtos.TeamDTO;
+import com.cbd.teamcontroller.model.utils.RoleType;
 import com.cbd.teamcontroller.service.CoachService;
 import com.cbd.teamcontroller.service.PlayerService;
 import com.cbd.teamcontroller.service.TeamService;
@@ -45,19 +50,31 @@ public class TeamController {
 
 	@GetMapping("/team/")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<Team> getTeamByPlayer() {
+	public ResponseEntity<Map<Integer,Object>> getTeamByPlayer() {
+		Map<Integer,Object> res = new HashMap<Integer, Object>();
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
-		Player p = playerService.findByUsername(username);
-		if (p != null) {
-			List<Team> teams = teamService.findAll();
-			if (!teams.isEmpty()) {
-				Optional<Team> t = teams.stream().filter(x -> x.getPlayers().contains(p)).findFirst();
-				Team res = null;
-				if (t.isPresent()) {
-					res = t.get();
+		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+		
+		if(authorities.contains("ROLE_COACH")) {
+			Team t = teamService.findTeamByCoachUsername(username);
+			if (t != null) {
+				res.put(0, t);
+				return new ResponseEntity<>(res,HttpStatus.OK);
+			}
+		}else { 
+			Player p = playerService.findByUsername(username);
+			if (p != null) {
+				List<Team> teams = teamService.findAll();
+				if (!teams.isEmpty()) {
+					Optional<Team> t = teams.stream().filter(x -> x.getPlayers().contains(p)).findFirst();
+					Team teamRes = null;
+					if (t.isPresent()) {
+						teamRes = t.get();
+						res.put(0,teamRes);
+					}
+					return ResponseEntity.ok(res);
 				}
-				return ResponseEntity.ok(res);
 			}
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

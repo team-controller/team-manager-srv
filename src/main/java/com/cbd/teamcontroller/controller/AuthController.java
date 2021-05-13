@@ -24,9 +24,11 @@ import com.cbd.teamcontroller.configuration.security.payload.request.SignupReque
 import com.cbd.teamcontroller.configuration.security.payload.response.LoginResponse;
 import com.cbd.teamcontroller.model.Coach;
 import com.cbd.teamcontroller.model.Player;
+import com.cbd.teamcontroller.model.Team;
 import com.cbd.teamcontroller.model.User;
 import com.cbd.teamcontroller.model.mapper.UserDataMapper;
 import com.cbd.teamcontroller.model.utils.RoleType;
+import com.cbd.teamcontroller.service.TeamService;
 import com.cbd.teamcontroller.service.UserService;
 
 @CrossOrigin(origins="*", maxAge=3600, methods= {RequestMethod.PATCH,  RequestMethod.POST})
@@ -43,6 +45,9 @@ public class AuthController {
 	@Autowired
 	JwtUtils jwtUtils;
 	
+	@Autowired
+	TeamService teamService;
+	
 	@PostMapping("/signin")
 	public ResponseEntity<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 		var authentication = authenticationManager.authenticate(
@@ -50,8 +55,11 @@ public class AuthController {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		var userDetails = (User) authentication.getPrincipal();
+		Boolean hasTeam = false;
+		if (teamService.findTeamByCoachUsername(userDetails.getUsername()) != null)
+				hasTeam = true;
 		SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd");
-		return ResponseEntity.ok(new LoginResponse(jwt, userDetails.getUsername(), format.format(userDetails.getFechaNacimiento()), userDetails.getFirstName(), userDetails.getSecondName(), userDetails.getRol().getName()));
+		return ResponseEntity.ok(new LoginResponse(jwt, userDetails.getUsername(), format.format(userDetails.getFechaNacimiento()), userDetails.getFirstName(), userDetails.getSecondName(), userDetails.getRol().getName(),hasTeam));
 	
 	}
 	

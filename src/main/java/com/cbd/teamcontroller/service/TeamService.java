@@ -29,7 +29,13 @@ public class TeamService {
 	}
 
 	public Team findTeamByCoachUsername(String username) {
-		return this.teamRepository.findTeamByCoachUsername(username);
+		Optional<Team> team = this.teamRepository.findTeamByCoachUsername(username);
+		Team res = null; 
+		if (team.isPresent()) { 
+			res = team.get();
+		}
+		return res; 
+		
 	}
 	
 	public void delete(Team t) {

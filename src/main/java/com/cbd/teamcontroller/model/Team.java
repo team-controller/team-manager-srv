@@ -24,6 +24,10 @@ import lombok.Setter;
 @Table(name = "team")
 public class Team extends BaseEntity{
 
+	public Team () { 
+		
+	}
+	
 	public Team(@Valid TeamDTO teamDTO) {
 		this.name = teamDTO.getName();
 		this.stadiumName = teamDTO.getStadiumName();
