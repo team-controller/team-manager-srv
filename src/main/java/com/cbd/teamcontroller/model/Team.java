@@ -14,6 +14,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import com.cbd.teamcontroller.model.dtos.TeamDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -50,12 +51,15 @@ public class Team extends BaseEntity{
 	@Column(name = "points")
 	private Integer points; 
 	
+	@JsonIgnore
 	@OneToOne()
 	private Coach coach;
 	
+	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	Set<Player> players; 
 	
+	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	Set<Matches> matches; 
 	
