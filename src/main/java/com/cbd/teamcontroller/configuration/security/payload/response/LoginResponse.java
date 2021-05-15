@@ -1,6 +1,5 @@
 package com.cbd.teamcontroller.configuration.security.payload.response;
 
-import com.cbd.teamcontroller.model.Team;
 
 public class LoginResponse {
 	

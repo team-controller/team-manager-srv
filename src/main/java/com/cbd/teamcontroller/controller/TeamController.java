@@ -29,7 +29,6 @@ import com.cbd.teamcontroller.model.Coach;
 import com.cbd.teamcontroller.model.Player;
 import com.cbd.teamcontroller.model.Team;
 import com.cbd.teamcontroller.model.dtos.TeamDTO;
-import com.cbd.teamcontroller.model.utils.RoleType;
 import com.cbd.teamcontroller.service.CoachService;
 import com.cbd.teamcontroller.service.PlayerService;
 import com.cbd.teamcontroller.service.TeamService;
@@ -51,7 +50,7 @@ public class TeamController {
 	@GetMapping("/team/")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Map<Integer,Object>> getTeamByPlayer() {
-		Map<Integer,Object> res = new HashMap<Integer, Object>();
+		Map<Integer,Object> res = new HashMap<>();
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());

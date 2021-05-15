@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -46,6 +48,7 @@ public class User implements UserDetails {
 	private String secondName;
 	
 	@NotNull
+	@DateTimeFormat(iso = ISO.DATE)
 	@Column(name = "fecha_nacimiento")
 	private Date fechaNacimiento; 
 
