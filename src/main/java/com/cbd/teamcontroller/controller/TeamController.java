@@ -92,7 +92,11 @@ public class TeamController {
 			t.setPlayers(new HashSet<>());
 			t.setPoints(0);
 			teamService.save(t);
-
+			
+			String date = c.getFechaNacimiento();
+			String[] element = date.split(" ");
+			String finalDate = element[0].replace("-", "/");
+			c.setFechaNacimiento(finalDate);
 			c.setTeam(t);
 			coachService.save(c);
 

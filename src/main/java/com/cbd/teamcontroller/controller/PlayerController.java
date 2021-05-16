@@ -89,19 +89,7 @@ public class PlayerController {
 			if (t.getCoach().getUsername().equals(username)) {
 				Player p = new Player(user);
 				p.setTeam(t);
-				p.setTrainings(new HashSet<>());
-				p.setMatches(new ArrayList<>());
-				p.setGoalsPerMatch(0);
-				p.setTotalGoals(0);
-				p.setYellowsPerMatch(0);
-				p.setTotalYellows(0);
-				p.setRedPerMatch(0);
-				p.setTotalReds(0);
-				p.setMinutesPerMatch(0);
-				p.setTotalMinutes(0);
-				p.setPosition(null);
 				playerService.save(p);
-
 				t.getPlayers().add(p);
 				teamService.save(t);
 			} else {
@@ -122,13 +110,9 @@ public class PlayerController {
 			if (t.getCoach().getUsername().equals(username)) {
 				Player p = playerService.findByUsername(usernamePlayer);
 				if (p != null) {
-					p.setUsername(res.getUsername());
-					p.setFirstName(res.getFirstName());
-					p.setSecondName(res.getSecondName());
-					p.setFechaNacimiento(res.getFechaNacimiento());
-					p.setPassword(res.getPassword());
-					p.setPhoneNumber(res.getPhoneNumber());
+					p = new Player(res);
 					playerService.save(p);
+					return ResponseEntity.ok().build();
 				}
 			} else {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
