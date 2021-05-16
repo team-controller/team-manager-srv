@@ -2,19 +2,15 @@ package com.cbd.teamcontroller.model;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -48,17 +44,14 @@ public class User implements UserDetails {
 	private String secondName;
 	
 	@NotNull
-	@DateTimeFormat(iso = ISO.DATE)
+	@Pattern(regexp = "^(0?[1-9]|[12][0-9]|3[01])[\\/](0?[1-9]|1[012])[\\/]\\d{4}$")
 	@Column(name = "fecha_nacimiento")
-	private Date fechaNacimiento; 
+	private String fechaNacimiento; 
 
 	@NotBlank
 	@Column(name = "phone_number" ) 
 	private String phoneNumber; 
 	
-	
-	@OneToOne(cascade = CascadeType.ALL)
-	private DBImage imagen;
 	
 	@NotNull
 	@Column(name = "role")
@@ -68,7 +61,7 @@ public class User implements UserDetails {
 	}
 	
 	public User(String username, String firstName, String secondName, String phoneNumber, String password,
-			Date fechaNacimiento, RoleType rol) {
+			String fechaNacimiento, RoleType rol) {
 		this.username = username; 
 		this.firstName = firstName; 
 		this.secondName = secondName; 

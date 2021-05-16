@@ -47,7 +47,6 @@ public class Team extends BaseEntity{
 	@Column(name = "city")
 	private String city; 
 	
-	@NotNull
 	@Column(name = "points")
 	private Integer points; 
 	

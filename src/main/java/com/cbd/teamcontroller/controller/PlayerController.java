@@ -40,7 +40,7 @@ public class PlayerController {
 	@Autowired
 	private PlayerService playerService;
 
-	@GetMapping("/team/{idTeam}/jugadores")
+	@GetMapping("/team/{idTeam}/players")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Set<Player>> getPlayersTeam(@PathVariable("idTeam") Integer idTeam) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -57,7 +57,7 @@ public class PlayerController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@GetMapping("/team/{idTeam}/jugador/{usernamePlayer}")
+	@GetMapping("/team/{idTeam}/player/{usernamePlayer}")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Player> getPlayer(@PathVariable("idTeam") Integer idTeam,
 			@PathVariable("usernamePlayer") String usernamePlayer) {
@@ -78,7 +78,7 @@ public class PlayerController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@PostMapping("/team/{idTeam}/jugador/create")
+	@PostMapping("/team/{idTeam}/player/create")
 	@PreAuthorize("hasRole('COACH')")
 	public ResponseEntity<Player> createPlayer(@PathVariable("idTeam") Integer idTeam,
 			@RequestBody UserDataMapper user) {
@@ -99,6 +99,7 @@ public class PlayerController {
 				p.setTotalReds(0);
 				p.setMinutesPerMatch(0);
 				p.setTotalMinutes(0);
+				p.setPosition(null);
 				playerService.save(p);
 
 				t.getPlayers().add(p);
@@ -110,7 +111,7 @@ public class PlayerController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@PutMapping("/team/{idTeam}/jugador/{usernamePlayer}/editarInfoJugador")
+	@PutMapping("/team/{idTeam}/player/{usernamePlayer}/edit")
 	@PreAuthorize("hasRole('COACH')")
 	public ResponseEntity<Player> editInfoPersonalPlayer(@PathVariable("idTeam") Integer idTeam,
 			@PathVariable("idPlayer") String usernamePlayer, @RequestBody UserDataMapper res) {
@@ -136,7 +137,7 @@ public class PlayerController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@PutMapping("/team/{idTeam}/jugador/{usernamePlayer}/editarMatchJugador")
+	@PutMapping("/team/{idTeam}/player/{usernamePlayer}/editMatch")
 	@PreAuthorize("hasRole('COACH')")
 	public ResponseEntity<Player> editInfoPartidosPlayer(@PathVariable("idTeam") Integer idTeam,
 			@PathVariable("usernamePlayer") String usernamePlayer, @RequestBody PlayerDTO playerDTO) {
@@ -159,7 +160,7 @@ public class PlayerController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@DeleteMapping("/team/{idTeam}/jugador/{usernamePlayer}/editarMatchJugador")
+	@DeleteMapping("/team/{idTeam}/player/{usernamePlayer}/delete")
 	@PreAuthorize("hasRole('COACH')")
 	public ResponseEntity<Player> deletePlayer(@PathVariable("idTeam") Integer idTeam,
 			@PathVariable("usernamePlayer") String usernamePlayer) {

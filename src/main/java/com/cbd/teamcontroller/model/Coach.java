@@ -1,6 +1,5 @@
 package com.cbd.teamcontroller.model;
 
-import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -40,7 +39,7 @@ public class Coach extends User{
     }
 
 	public Coach(String username, String firstName, String secondName, String phoneNumber, String password,
-			Date fechaNacimiento, RoleType rol, Team team) {
+			String fechaNacimiento, RoleType rol, Team team) {
 		super(username, firstName, secondName, phoneNumber, password, fechaNacimiento, rol);
 		this.team = team;
 	}

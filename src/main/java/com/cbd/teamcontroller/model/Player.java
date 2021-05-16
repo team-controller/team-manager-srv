@@ -53,6 +53,9 @@ public class Player extends User {
 	@Column(name = "total_yellows")
 	private Integer totalYellows; 
 	
+	@Column(name = "position")
+	private String position;
+	
 	@Column(name = "reds_match")
 	private Integer redPerMatch; 
 	

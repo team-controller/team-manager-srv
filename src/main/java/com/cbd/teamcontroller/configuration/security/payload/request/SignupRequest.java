@@ -3,14 +3,11 @@ package com.cbd.teamcontroller.configuration.security.payload.request;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-
-import org.springframework.format.annotation.DateTimeFormat;
 
 @Getter
 @Setter
@@ -28,8 +25,8 @@ public class SignupRequest {
     private String password;
     
 	@NotNull
-	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-	private Date fechaNacimiento; 
+	@Pattern(regexp = "^(0?[1-9]|[12][0-9]|3[01])[\\/](0?[1-9]|1[012])[\\/]\\d{4}$")
+	private String fechaNacimiento; 
 
     @NotBlank
     private String firstName;

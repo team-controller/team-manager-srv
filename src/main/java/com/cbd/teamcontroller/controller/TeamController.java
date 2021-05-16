@@ -115,6 +115,7 @@ public class TeamController {
 				edit.setCoach(c);
 				edit.setMatches(t.getMatches());
 				edit.setPlayers(t.getPlayers());
+				edit.setPoints(t.getPoints());
 				teamService.save(edit);
 
 				return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -135,6 +136,7 @@ public class TeamController {
 				c.setTeam(null);
 				coachService.save(c);
 				teamService.delete(t);
+				return ResponseEntity.ok().build();
 			}
 		}
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

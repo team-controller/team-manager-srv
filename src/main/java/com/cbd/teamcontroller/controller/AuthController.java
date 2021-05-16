@@ -1,7 +1,5 @@
 package com.cbd.teamcontroller.controller;
 
-import java.text.SimpleDateFormat;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +54,7 @@ public class AuthController {
 		Boolean hasTeam = false;
 		if (teamService.findTeamByCoachUsername(userDetails.getUsername()) != null)
 				hasTeam = true;
-		SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd");
-		return ResponseEntity.ok(new LoginResponse(jwt, userDetails.getUsername(), format.format(userDetails.getFechaNacimiento()), userDetails.getFirstName(), userDetails.getSecondName(), userDetails.getRol().getName(),hasTeam));
+		return ResponseEntity.ok(new LoginResponse(jwt, userDetails.getUsername(), userDetails.getFechaNacimiento(), userDetails.getFirstName(), userDetails.getSecondName(), userDetails.getRol().getName(),hasTeam));
 	
 	}
 	
