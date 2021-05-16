@@ -100,7 +100,7 @@ public class TeamController {
 			c.setTeam(t);
 			coachService.save(c);
 
-			return ResponseEntity.status(HttpStatus.CREATED).build();
+			return ResponseEntity.ok(t);
 		}
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 	}
