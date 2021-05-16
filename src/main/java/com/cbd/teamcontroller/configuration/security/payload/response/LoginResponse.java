@@ -1,5 +1,6 @@
 package com.cbd.teamcontroller.configuration.security.payload.response;
 
+import com.cbd.teamcontroller.model.Team;
 
 public class LoginResponse {
 	
@@ -10,11 +11,11 @@ public class LoginResponse {
 	private String firstName;
 	private String secondName;
 	private String role;
-	private Boolean hasTeam; 
+	private Team team; 
 
 
 	public LoginResponse(String token, String username, String fechaNacimiento, String firstName,
-			String secondName, String role, Boolean hasTeam) {
+			String secondName, String role, Team team) {
 		super();
 		this.token = token;
 		this.username = username;
@@ -22,7 +23,7 @@ public class LoginResponse {
 		this.firstName = firstName;
 		this.secondName = secondName;
 		this.role = role;
-		this.hasTeam = hasTeam;
+		this.team = team;
 	}
 
 	public String getAccessToken() {
@@ -76,12 +77,12 @@ public class LoginResponse {
 	public void setsecondName(String secondName) {
 		this.secondName = secondName;
 	}
-	public Boolean getHasTeam() {
-		return hasTeam;
+	public Team getTeam() {
+		return team;
 	}
 
-	public void setHasTeam(Boolean hasTeam) {
-		this.hasTeam = hasTeam;
+	public void setTeam(Team team) {
+		this.team = team;
 	}
 
 }

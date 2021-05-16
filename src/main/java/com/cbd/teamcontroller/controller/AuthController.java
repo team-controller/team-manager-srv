@@ -21,6 +21,7 @@ import com.cbd.teamcontroller.configuration.security.payload.request.SignupReque
 import com.cbd.teamcontroller.configuration.security.payload.response.LoginResponse;
 import com.cbd.teamcontroller.model.Coach;
 import com.cbd.teamcontroller.model.Player;
+import com.cbd.teamcontroller.model.Team;
 import com.cbd.teamcontroller.model.User;
 import com.cbd.teamcontroller.model.mapper.UserDataMapper;
 import com.cbd.teamcontroller.model.utils.RoleType;
@@ -51,10 +52,12 @@ public class AuthController {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		var userDetails = (User) authentication.getPrincipal();
-		Boolean hasTeam = false;
-		if (teamService.findTeamByCoachUsername(userDetails.getUsername()) != null)
-				hasTeam = true;
-		return ResponseEntity.ok(new LoginResponse(jwt, userDetails.getUsername(), userDetails.getFechaNacimiento(), userDetails.getFirstName(), userDetails.getSecondName(), userDetails.getRol().getName(),hasTeam));
+		Team team = null;
+		Team t = teamService.findTeamByCoachUsername(userDetails.getUsername());
+		if(t != null) {
+			team = t;
+		}
+		return ResponseEntity.ok(new LoginResponse(jwt, userDetails.getUsername(), userDetails.getFechaNacimiento(), userDetails.getFirstName(), userDetails.getSecondName(), userDetails.getRol().getName(),team));
 	
 	}
 	
