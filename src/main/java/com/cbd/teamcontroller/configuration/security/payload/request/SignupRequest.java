@@ -25,7 +25,7 @@ public class SignupRequest {
     private String password;
     
 	@NotNull
-	@Pattern(regexp = "^(0?[1-9]|[12][0-9]|3[01])[\\/](0?[1-9]|1[012])[\\/]\\d{4}$")
+	@Pattern(regexp = "^(\\d{4})[\\/](0?[1-9]|1[012])[\\/](0?[1-9]|[12][0-9]|3[01])$")
 	private String fechaNacimiento; 
 
     @NotBlank
