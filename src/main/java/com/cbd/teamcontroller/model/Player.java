@@ -69,6 +69,10 @@ public class Player extends User {
 	
 	@Column(name = "total_minutes")
 	private Integer totalMinutes = 0; 
+
+	public Player() { 
+		
+	}
 	
 	public Player(UserDataMapper userData) {
 		super(userData.getUsername(), userData.getFirstName(), userData.getSecondName(), userData.getPhoneNumber(),userData.getPassword(), userData.getFechaNacimiento(), userData.getRol());
