@@ -1,7 +1,5 @@
 package com.cbd.teamcontroller.controller;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -92,6 +90,7 @@ public class PlayerController {
 				playerService.save(p);
 				t.getPlayers().add(p);
 				teamService.save(t);
+				return ResponseEntity.ok().build();
 			} else {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 			}
@@ -136,6 +135,7 @@ public class PlayerController {
 					p.setTotalYellows(p.getTotalYellows() + playerDTO.getYellowsPerMatch());
 					p.setTotalReds(p.getTotalReds() + playerDTO.getRedPerMatch());
 					playerService.save(p);
+					return ResponseEntity.ok().build();
 				}
 			} else {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -158,6 +158,7 @@ public class PlayerController {
 					t.getPlayers().remove(p);
 					teamService.save(t);
 					playerService.remove(p);
+					return ResponseEntity.ok().build();
 				}
 			} else {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
