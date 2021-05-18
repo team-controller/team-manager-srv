@@ -8,6 +8,9 @@ import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,21 +21,25 @@ import lombok.Setter;
 @Table(name = "matches")
 public class Matches extends BaseEntity{
 	
-	@NotBlank
+	@NotNull
 	@Column(name = "date")
+//	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date date; 
 	
-	@NotBlank
+	@NotNull
 	@Column(name = "start_time")
-	private LocalDateTime startTime;
+//	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	private Date startTime;
 	
-	@NotBlank
+	@NotNull
 	@Column(name = "end_time")
-	private LocalDateTime endTime;
+//	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	private Date endTime;
 	
-	@NotBlank
+	@NotNull
 	@Column(name = "call_time")
-	private LocalDateTime callTime;
+//	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	private Date callTime;
 	
 	@NotBlank
 	@Column(name = "callPlace")
@@ -45,11 +52,12 @@ public class Matches extends BaseEntity{
 	@Column(name = "matchPlace")
 	private String matchPlace; 
 	
-	@OneToOne
-	private Team localTeam; 
+	@Column(name = "localTeam")
+	private String localTeam; 
 	
-	@OneToOne
-	private Team visitorTeam; 
+	@NotBlank
+	@Column(name = "visitorTeam")
+	private String visitorTeam; 
 	
 	
 }

@@ -145,5 +145,19 @@ public class TeamController {
 		}
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 	}
+	@GetMapping("/haveTeam/")
+	@PreAuthorize("hasRole('COACH')")
+	public ResponseEntity<Boolean> haveTeam() { 
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+		if(authorities.contains("ROLE_COACH")) {
+			Team t = this.teamService.findTeamByCoachUsername(username);
+			if (t != null) {
+				return ResponseEntity.ok(true);
+			}
+		}
+		return ResponseEntity.badRequest().build();
+	}
 
 }
