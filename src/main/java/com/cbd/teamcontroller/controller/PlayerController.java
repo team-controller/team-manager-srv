@@ -1,5 +1,6 @@
 package com.cbd.teamcontroller.controller;
 
+import java.text.Format;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cbd.teamcontroller.model.Player;
@@ -67,6 +69,11 @@ public class PlayerController {
 			if (username.equals(t.getCoach().getUsername()) || namesPlayers.contains(username)) {
 				Player p = playerService.findByUsername(usernamePlayer);
 				if (p != null) {
+					String date = p.getFechaNacimiento();
+					String[] element = date.split(" ");
+					String finalDate = element[0].replace("-", "/");
+					p.setFechaNacimiento(finalDate);
+					
 					return ResponseEntity.ok(p);
 				}
 			} else {
@@ -76,10 +83,10 @@ public class PlayerController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@PostMapping("/team/{idTeam}/player/create")
+	@PostMapping("/team/{idTeam}/player/{position}/create")
 	@PreAuthorize("hasRole('COACH')")
 	public ResponseEntity<Player> createPlayer(@PathVariable("idTeam") Integer idTeam,
-			@RequestBody UserDataMapper user) {
+			@RequestBody UserDataMapper user, @PathVariable("position") String posicion) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		Team t = teamService.findById(idTeam);
@@ -87,6 +94,7 @@ public class PlayerController {
 			if (t.getCoach().getUsername().equals(username)) {
 				Player p = new Player(user);
 				p.setTeam(t);
+				p.setPosition(posicion);
 				playerService.save(p);
 				t.getPlayers().add(p);
 				teamService.save(t);
@@ -98,10 +106,11 @@ public class PlayerController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@PutMapping("/team/{idTeam}/player/{usernamePlayer}/edit")
+	@PutMapping("/team/{idTeam}/player/{usernamePlayer}/edit/{position}")
 	@PreAuthorize("hasRole('COACH')")
 	public ResponseEntity<Player> editInfoPersonalPlayer(@PathVariable("idTeam") Integer idTeam,
-			@PathVariable("idPlayer") String usernamePlayer, @RequestBody UserDataMapper res) {
+			@PathVariable("usernamePlayer") String usernamePlayer, @PathVariable("position") String posicion,
+			@RequestBody UserDataMapper res) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		Team t = teamService.findById(idTeam);
@@ -109,7 +118,18 @@ public class PlayerController {
 			if (t.getCoach().getUsername().equals(username)) {
 				Player p = playerService.findByUsername(usernamePlayer);
 				if (p != null) {
+					String date = res.getFechaNacimiento();
+					String[] element = date.split(" ");
+					String finalDate = element[0].replace("-", "/");
+					res.setFechaNacimiento(finalDate);
+					Player p1 = p;
 					p = new Player(res);
+					p.setMatches(p1.getMatches());
+					p.setTotalGoals(p1.getTotalGoals());
+					p.setTotalMinutes(p1.getTotalMinutes());
+					p.setTotalYellows(p1.getTotalYellows());
+					p.setTotalReds(p1.getTotalReds());
+					p.setPosition(posicion);
 					playerService.save(p);
 					return ResponseEntity.ok().build();
 				}
@@ -134,6 +154,13 @@ public class PlayerController {
 					p.setTotalGoals(p.getTotalGoals() + playerDTO.getGoalsPerMatch());
 					p.setTotalYellows(p.getTotalYellows() + playerDTO.getYellowsPerMatch());
 					p.setTotalReds(p.getTotalReds() + playerDTO.getRedPerMatch());
+					p.setTotalMinutes(p.getTotalMinutes() + playerDTO.getMinutesPerMatch());
+					
+					String date = p.getFechaNacimiento();
+					String[] element = date.split(" ");
+					String finalDate = element[0].replace("-", "/");
+					p.setFechaNacimiento(finalDate);
+					
 					playerService.save(p);
 					return ResponseEntity.ok().build();
 				}

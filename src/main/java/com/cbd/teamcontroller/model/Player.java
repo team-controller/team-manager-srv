@@ -56,7 +56,7 @@ public class Player extends User {
 	private Integer totalYellows = 0; 
 	
 	@Column(name = "position")
-	private String position = "No definido";
+	private String position;
 	
 	@Column(name = "reds_match")
 	private Integer redPerMatch = 0; 
