@@ -32,7 +32,6 @@ import com.cbd.teamcontroller.model.Matches;
 import com.cbd.teamcontroller.model.Player;
 import com.cbd.teamcontroller.model.StatusMatch;
 import com.cbd.teamcontroller.model.Team;
-import com.cbd.teamcontroller.model.dtos.MatchesDTO;
 import com.cbd.teamcontroller.service.MatchesService;
 import com.cbd.teamcontroller.service.PlayerService;
 import com.cbd.teamcontroller.service.TeamService;
@@ -55,13 +54,13 @@ public class MatchesController {
 	
 	@GetMapping("/matches")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<Set<Matches>> getAllMatchesByTeam() {
+	public ResponseEntity<List<Matches>> getAllMatchesByTeam() {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
         
 		Team t = this.teamService.findTeamByCoachUsername(username);
 		if(t != null) {
-			Set<Matches> matches  = t.getMatches();
+			List<Matches> matches  = t.getMatches().stream().collect(Collectors.toList());
 //			Set<MatchesDTO> matches  = new HashSet<>();
 //			for (Matches m : t.getMatches()) {
 //				MatchesDTO mDTO = new MatchesDTO(m.getId(),m.getDate(), m.getStartTime(), m.getEndTime(), m.getCallTime(), m.getCallPlace(),m.getStatus(), 
@@ -132,7 +131,7 @@ public class MatchesController {
 	
 	@DeleteMapping("/match/delete/{idMatch}")
 	@PreAuthorize("hasRole('COACH')")
-	public ResponseEntity<Set<Matches>> deleteTable(@PathVariable("idMatch") Integer idMatch) {
+	public ResponseEntity<Set<Matches>> deleteMatch(@PathVariable("idMatch") Integer idMatch) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		

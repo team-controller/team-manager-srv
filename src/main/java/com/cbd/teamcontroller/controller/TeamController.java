@@ -155,6 +155,8 @@ public class TeamController {
 			Team t = this.teamService.findTeamByCoachUsername(username);
 			if (t != null) {
 				return ResponseEntity.ok(true);
+			}else {
+				return ResponseEntity.ok(false);
 			}
 		}
 		return ResponseEntity.badRequest().build();

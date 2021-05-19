@@ -23,22 +23,17 @@ public class Matches extends BaseEntity{
 	
 	@NotNull
 	@Column(name = "date")
-//	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="yyyy/MM/dd")
 	private Date date; 
 	
 	@NotNull
 	@Column(name = "start_time")
-//	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="HH:mm:ss")
 	private Date startTime;
-	
-	@NotNull
-	@Column(name = "end_time")
-//	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-	private Date endTime;
-	
+		
 	@NotNull
 	@Column(name = "call_time")
-//	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="HH:mm:ss")
 	private Date callTime;
 	
 	@NotBlank
