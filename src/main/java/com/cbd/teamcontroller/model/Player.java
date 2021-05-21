@@ -69,6 +69,9 @@ public class Player extends User {
 	
 	@Column(name = "total_minutes")
 	private Integer totalMinutes = 0; 
+	
+	@Column(name="convocado")
+	private Boolean convocado = false;
 
 	public Player() { 
 		

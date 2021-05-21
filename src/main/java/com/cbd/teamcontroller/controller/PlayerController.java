@@ -1,6 +1,5 @@
 package com.cbd.teamcontroller.controller;
 
-import java.text.Format;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cbd.teamcontroller.model.Player;
@@ -73,7 +71,7 @@ public class PlayerController {
 					String[] element = date.split(" ");
 					String finalDate = element[0].replace("-", "/");
 					p.setFechaNacimiento(finalDate);
-					
+
 					return ResponseEntity.ok(p);
 				}
 			} else {
@@ -85,8 +83,8 @@ public class PlayerController {
 
 	@PostMapping("/team/{idTeam}/player/{position}/create")
 	@PreAuthorize("hasRole('COACH')")
-	public ResponseEntity<Player> createPlayer(@PathVariable("idTeam") Integer idTeam,
-			@RequestBody UserDataMapper user, @PathVariable("position") String posicion) {
+	public ResponseEntity<Player> createPlayer(@PathVariable("idTeam") Integer idTeam, @RequestBody UserDataMapper user,
+			@PathVariable("position") String posicion) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		Team t = teamService.findById(idTeam);
@@ -155,12 +153,12 @@ public class PlayerController {
 					p.setTotalYellows(p.getTotalYellows() + playerDTO.getYellowsPerMatch());
 					p.setTotalReds(p.getTotalReds() + playerDTO.getRedPerMatch());
 					p.setTotalMinutes(p.getTotalMinutes() + playerDTO.getMinutesPerMatch());
-					
+
 					String date = p.getFechaNacimiento();
 					String[] element = date.split(" ");
 					String finalDate = element[0].replace("-", "/");
 					p.setFechaNacimiento(finalDate);
-					
+
 					playerService.save(p);
 					return ResponseEntity.ok().build();
 				}
@@ -181,7 +179,7 @@ public class PlayerController {
 		if (t != null) {
 			if (t.getCoach().getUsername().equals(username)) {
 				Player p = playerService.findByUsername(usernamePlayer);
-				if(p!=null) {
+				if (p != null) {
 					t.getPlayers().remove(p);
 					teamService.save(t);
 					playerService.remove(p);

@@ -1,7 +1,15 @@
 package com.cbd.teamcontroller.controller;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,27 +48,25 @@ import com.cbd.teamcontroller.service.TeamService;
 @RestController
 @RequestMapping("/api")
 public class MatchesController {
-	
+
 	@Autowired
 	private MatchesService matchesService;
-	
+
 	@Autowired
-	private TeamService teamService; 
-	
+	private TeamService teamService;
+
 	@Autowired
 	private PlayerService playerService;
-	
-	
-	
+
 	@GetMapping("/matches")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<List<Matches>> getAllMatchesByTeam() {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
-        
+
 		Team t = this.teamService.findTeamByCoachUsername(username);
-		if(t != null) {
-			List<Matches> matches  = t.getMatches().stream().collect(Collectors.toList());
+		if (t != null) {
+			List<Matches> matches = t.getMatches().stream().collect(Collectors.toList());
 //			Set<MatchesDTO> matches  = new HashSet<>();
 //			for (Matches m : t.getMatches()) {
 //				MatchesDTO mDTO = new MatchesDTO(m.getId(),m.getDate(), m.getStartTime(), m.getEndTime(), m.getCallTime(), m.getCallPlace(),m.getStatus(), 
@@ -70,14 +76,14 @@ public class MatchesController {
 //			System.out.print(matches);
 			return new ResponseEntity<>(matches, HttpStatus.OK);
 		}
-		
+
 		return ResponseEntity.notFound().build();
-		
+
 	}
-	
+
 	@GetMapping("/oneMatch/{matchId}")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<Matches> getOneMatchDetails(@PathVariable("matchId") Integer matchId) { 
+	public ResponseEntity<Matches> getOneMatchDetails(@PathVariable("matchId") Integer matchId) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority)
@@ -104,38 +110,36 @@ public class MatchesController {
 		}
 		return ResponseEntity.notFound().build();
 	}
-	
-	
+
 	@PostMapping("/match/create/")
 	@PreAuthorize("hasRole('COACH')")
-	public ResponseEntity<Matches> createMatch(@Valid @RequestBody Matches match) { 
-		
+	public ResponseEntity<Matches> createMatch(@Valid @RequestBody Matches match) {
+
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toList());
-		
-		if(authorities.contains("ROLE_COACH")) {
-			 Team t = this.teamService.findTeamByCoachUsername(username);
-			 match.setStatus(StatusMatch.valueOf("PENDIENTE"));
-			 match.setLocalTeam(t.getName());
-			 this.matchesService.saveMatch(match);
-			 t.getMatches().add(match);
-			 this.teamService.save(t);
-			 return ResponseEntity.ok(match);
-		}else { 
+
+		if (authorities.contains("ROLE_COACH")) {
+			Team t = this.teamService.findTeamByCoachUsername(username);
+			match.setStatus(StatusMatch.valueOf("PENDIENTE"));
+			match.setLocalTeam(t.getName());
+			this.matchesService.saveMatch(match);
+			t.getMatches().add(match);
+			this.teamService.save(t);
+			return ResponseEntity.ok(match);
+		} else {
 			return ResponseEntity.badRequest().build();
 		}
 	}
-	
-	
+
 	@DeleteMapping("/match/delete/{idMatch}")
 	@PreAuthorize("hasRole('COACH')")
 	public ResponseEntity<Set<Matches>> deleteMatch(@PathVariable("idMatch") Integer idMatch) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
-		
-		if(idMatch != null) { 
+
+		if (idMatch != null) {
 			Matches m = this.matchesService.getMatchesByID(idMatch);
 			Team t = this.teamService.findTeamByCoachUsername(username);
 			t.getMatches().remove(m);
@@ -143,15 +147,94 @@ public class MatchesController {
 			this.matchesService.removeMatch(idMatch);
 			return ResponseEntity.ok(t.getMatches());
 		}
-		
+
 		return ResponseEntity.badRequest().build();
 	}
+
+//	@GetMapping("/team/{idTeam}/player/{usernamePlayer}/c")
+//	@PreAuthorize("hasRole('COACH')")
+//	public ResponseEntity<Matches> setPlayerInMatchList(@PathVariable("idTeam") Integer idTeam,
+//			@PathVariable("usernamePlayer") String usernamePlayer) {
+//		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//		String username = ud.getUsername();
+//		Team t = teamService.findById(idTeam);
+//		if (t != null) {
+//			if (t.getCoach().getUsername().equals(username)) {
+//				Player p = playerService.findByUsername(usernamePlayer);
+//				if (p != null) {
+//					ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+//					ZoneId madridZone = ZoneId.of("Europe/Madrid");
+//					ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+//					LocalDateTime dt = madridZoned.toLocalDateTime();
+//
+//					Date date = Date.from(dt.atZone(ZoneId.systemDefault()).toInstant());
+//					Timestamp ts = new Timestamp(date.getTime());
+//					
+//					List<Matches> partidos = new ArrayList<>(t.getMatches());
+//					Comparator<Matches> c = (m1, m2) -> m1.getDate().compareTo(m2.getDate());
+//					Collections.sort(partidos, c);
+//					
+//					Optional<Matches> m = partidos.stream().filter(x -> x.getDate().after(ts)).findFirst();
+//					Matches m2 = null;
+//					if (m.isPresent()) {
+//						m2 = m.get();
+////						m2.getConvocados().add(p);
+//						matchesService.saveMatch(m2);
+//					}
+//					if (m2 != null) {
+//						return ResponseEntity.ok().build();
+//					}
+//				}
+//			} else {
+//				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//			}
+//		}
+//		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+//	}
 	
+	@GetMapping("/team/{idTeam}/player/{usernamePlayer}/convocar")
+	@PreAuthorize("hasRole('COACH')")
+	public ResponseEntity<Matches> convocar(@PathVariable("idTeam") Integer idTeam,
+			@PathVariable("usernamePlayer") String usernamePlayer) {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		Team t = teamService.findById(idTeam);
+		if (t != null) {
+			if (t.getCoach().getUsername().equals(username)) {
+				Player p = playerService.findByUsername(usernamePlayer);
+				if (p != null) {
+					p.setConvocado(true);
+					playerService.save(p);
+					return ResponseEntity.ok().build();
+				}
+			} else {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+			}
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	}
 	
+	@GetMapping("/team/{idTeam}/player/{usernamePlayer}/desconvocar")
+	@PreAuthorize("hasRole('COACH')")
+	public ResponseEntity<Matches> desconvocar(@PathVariable("idTeam") Integer idTeam,
+			@PathVariable("usernamePlayer") String usernamePlayer) {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		Team t = teamService.findById(idTeam);
+		if (t != null) {
+			if (t.getCoach().getUsername().equals(username)) {
+				Player p = playerService.findByUsername(usernamePlayer);
+				if (p != null) {
+					p.setConvocado(false);
+					playerService.save(p);
+					return ResponseEntity.ok().build();
+				}
+			} else {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+			}
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	}
 	
-	
-	
-	
-	
-	
+
 }
