@@ -37,4 +37,13 @@ public class MatchesService {
 	    public void removeMatch(Integer id) {
 	    	this.matchesRepository.deleteById(id);
 	    }
+	    
+	    public Matches findById(Integer idMatch) { 
+	    	Optional<Matches> m =  this.matchesRepository.findById(idMatch);
+	    	if(m.isPresent()) { 
+	    		return m.get();
+	    	}else { 
+	    		return null;
+	    	}
+	    }
 }

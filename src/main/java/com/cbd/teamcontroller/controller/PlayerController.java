@@ -20,10 +20,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cbd.teamcontroller.model.Coach;
 import com.cbd.teamcontroller.model.Player;
 import com.cbd.teamcontroller.model.Team;
 import com.cbd.teamcontroller.model.dtos.PlayerDTO;
 import com.cbd.teamcontroller.model.mapper.UserDataMapper;
+import com.cbd.teamcontroller.service.CoachService;
 import com.cbd.teamcontroller.service.PlayerService;
 import com.cbd.teamcontroller.service.TeamService;
 
@@ -37,6 +39,9 @@ public class PlayerController {
 
 	@Autowired
 	private PlayerService playerService;
+	
+	@Autowired
+	private CoachService coachService;
 
 	@GetMapping("/team/{idTeam}/players")
 	@PreAuthorize("permitAll()")
@@ -54,7 +59,21 @@ public class PlayerController {
 		}
 		return ResponseEntity.notFound().build();
 	}
-
+	
+	@GetMapping("/team/playersByCoach")
+	@PreAuthorize("permitAll()")
+	public ResponseEntity<Set<Player>> getPlayersByCoach() {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		Coach c = this.coachService.findByUsername(username);
+		if (c != null) {
+			List<String> namesPlayers = c.getTeam().getPlayers().stream().map(x -> x.getUsername()).collect(Collectors.toList());
+				return ResponseEntity.ok(c.getTeam().getPlayers());
+		}
+		return ResponseEntity.notFound().build();
+	}
+	
+	
 	@GetMapping("/team/{idTeam}/player/{usernamePlayer}")
 	@PreAuthorize("permitAll()")
 	public ResponseEntity<Player> getPlayer(@PathVariable("idTeam") Integer idTeam,
