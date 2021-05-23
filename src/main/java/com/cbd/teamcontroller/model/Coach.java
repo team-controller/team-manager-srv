@@ -29,9 +29,6 @@ public class Coach extends User{
 	private Team team;
 	
 	@OneToMany(cascade = CascadeType.ALL)
-	private Set<Trainings> trainings; 
-	
-	@OneToMany(cascade = CascadeType.ALL)
 	private Set<Matches> matches;
 	
 	

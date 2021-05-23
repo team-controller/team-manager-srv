@@ -34,9 +34,6 @@ public class Player extends User {
 		this.minutesPerMatch = playerDTO.getMinutesPerMatch();
 	}
 	
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private Set<Trainings> trainings = new HashSet<>(); 
-	
 	@OneToMany()
 	private List<Matches> matches = new ArrayList<>(); 
 	
