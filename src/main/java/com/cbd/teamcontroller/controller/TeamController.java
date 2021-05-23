@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cbd.teamcontroller.model.Coach;
 import com.cbd.teamcontroller.model.Player;
+import com.cbd.teamcontroller.model.StatusMatch;
 import com.cbd.teamcontroller.model.Team;
 import com.cbd.teamcontroller.model.dtos.TeamDTO;
 import com.cbd.teamcontroller.service.CoachService;
@@ -37,7 +38,9 @@ import com.cbd.teamcontroller.service.TeamService;
 @RestController
 @RequestMapping("/api")
 public class TeamController {
-
+	
+	private static Integer points = 0;
+	
 	@Autowired
 	private CoachService coachService;
 
@@ -57,6 +60,16 @@ public class TeamController {
 		
 		if(authorities.contains("ROLE_COACH")) {
 			Team t = teamService.findTeamByCoachUsername(username);
+			t.getMatches().stream().forEach(data -> { 
+					if(data.getStatus().equals(StatusMatch.GANADO)) {
+						points =+3;
+					}else if(data.getStatus().equals((StatusMatch.EMPATADO))){
+						points =+1;
+					}
+			}
+			);
+			t.setPoints(points);
+			this.teamService.save(t);
 			if (t != null) {
 				res.put(0, t);
 				return new ResponseEntity<>(res,HttpStatus.OK);

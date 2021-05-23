@@ -47,6 +47,8 @@ import com.cbd.teamcontroller.service.TeamService;
 @RequestMapping("/api")
 public class MatchesController {
 
+	private static Integer points = 0;
+	
 	@Autowired
 	private MatchesService matchesService;
 
@@ -91,6 +93,18 @@ public class MatchesController {
 		String username = ud.getUsername();
 		Map<Integer, Object> res = new HashMap<Integer, Object>();
 		Team t = this.teamService.findById(idTeam);
+		t.getMatches().stream().forEach(data -> { 
+			if(data.getStatus().equals(StatusMatch.GANADO)) {
+				this.points = this.points + 3;
+			}else if(data.getStatus().equals((StatusMatch.EMPATADO))){
+				this.points = this.points + 1;
+			}
+			
+		}
+		);
+		t.setPoints(points);
+		this.points = 0;
+		this.teamService.save(t);
 		ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
 		ZoneId madridZone = ZoneId.of("Europe/Madrid");
 		ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
