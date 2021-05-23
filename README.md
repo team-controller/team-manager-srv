@@ -16,3 +16,4 @@ Realizar un npm install desde la consola estando ubicados en la carpeta donde te
 Posteriormente realizar un npm run start 
 
 La aplicacion debe de arrancar sobre el puerto 3000.
+
