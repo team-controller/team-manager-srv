@@ -86,10 +86,10 @@ public class MatchesController {
 	}
 	@GetMapping("/matches/threeNext/{idTeam}")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<List<Matches>> getThreeNextMatchesByCoach(@PathVariable("idTeam") Integer idTeam) {
+	public ResponseEntity<Map<Integer,Object>> getThreeNextMatchesByCoach(@PathVariable("idTeam") Integer idTeam) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
-
+		Map<Integer, Object> res = new HashMap<Integer, Object>();
 		Team t = this.teamService.findById(idTeam);
 		ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
 		ZoneId madridZone = ZoneId.of("Europe/Madrid");
@@ -108,7 +108,9 @@ public class MatchesController {
 			}else { 
 				matches.addAll(partidos);
 			}
-			return new ResponseEntity<>(matches, HttpStatus.OK);
+			res.put(0, matches);
+			res.put(1, t);
+			return new ResponseEntity<>(res, HttpStatus.OK);
 		}
 
 		return ResponseEntity.notFound().build();

@@ -34,7 +34,7 @@ public class Player extends User {
 		this.minutesPerMatch = playerDTO.getMinutesPerMatch();
 	}
 	
-	@OneToMany()
+	@OneToMany(fetch = FetchType.LAZY)
 	private List<Matches> matches = new ArrayList<>(); 
 	
 	@OneToOne

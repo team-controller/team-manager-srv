@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -25,10 +26,10 @@ public class Coach extends User{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	private Team team;
 	
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<Matches> matches;
 	
 	
