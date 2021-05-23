@@ -13,5 +13,6 @@ public interface TeamRepository extends JpaRepository<Team, Integer>{
 
 	@Query("select t from Team t where t.coach.username = :username")
 	Optional<Team> findTeamByCoachUsername(String username);
+	
 
 }

@@ -1,5 +1,7 @@
 package com.cbd.teamcontroller.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,6 +28,15 @@ public class UserService implements UserDetailsService{
 	}
     public void saveUser(User user) {
         this.userRepository.save(user);
+    }
+    
+    public User findUserByUserName(String username) {
+    	Optional<User> userOpt = this.userRepository.findByUsername(username);
+    	if(userOpt.isPresent()) {
+    		return userOpt.get();
+    	}else { 
+    		return null;
+    	}
     }
 	
 }

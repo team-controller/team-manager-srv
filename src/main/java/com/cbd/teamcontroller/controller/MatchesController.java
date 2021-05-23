@@ -1,9 +1,17 @@
 package com.cbd.teamcontroller.controller;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
@@ -69,12 +77,44 @@ public class MatchesController {
 		Team t = this.teamService.findTeamByCoachUsername(username);
 		if(t != null) {
 			List<Matches> matches  = t.getMatches().stream().collect(Collectors.toList());
+			Collections.sort(matches, new SortByDate());
 			return new ResponseEntity<>(matches, HttpStatus.OK);
 		}
 
 		return ResponseEntity.notFound().build();
 
 	}
+	@GetMapping("/matches/threeNext/{idTeam}")
+	@PreAuthorize("permitAll()")
+	public ResponseEntity<List<Matches>> getThreeNextMatchesByCoach(@PathVariable("idTeam") Integer idTeam) {
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+
+		Team t = this.teamService.findById(idTeam);
+		ZonedDateTime serverDefaultTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+		ZoneId madridZone = ZoneId.of("Europe/Madrid");
+		ZonedDateTime madridZoned = serverDefaultTime.withZoneSameInstant(madridZone);
+		LocalDateTime dt = madridZoned.toLocalDateTime();
+
+		Date date = Date.from(dt.atZone(ZoneId.systemDefault()).toInstant());
+		if(t != null) {
+			List<Matches> partidos = new ArrayList<>(t.getMatches()).stream().filter(x->x.getDate().after(date)).collect(Collectors.toList());
+			Collections.sort(partidos, new SortByDate());
+			List<Matches> matches = new ArrayList<Matches>();
+			if(partidos.size() > 3) {
+				for (int i = 0 ; i< 3 ; i++) {
+					matches.add(partidos.get(i));
+				}
+			}else { 
+				matches.addAll(partidos);
+			}
+			return new ResponseEntity<>(matches, HttpStatus.OK);
+		}
+
+		return ResponseEntity.notFound().build();
+
+	}
+	
 
 	@GetMapping("/oneMatch/{matchId}")
 	@PreAuthorize("permitAll()")
@@ -186,18 +226,16 @@ public class MatchesController {
 //		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 //	}
 	
-	@GetMapping("/team/{idTeam}/match/{idMatch}/player/{usernamePlayer}/convocar")
-//	@PreAuthorize("hasRole('COACH')")
-	public ResponseEntity<Matches> convocar(@PathVariable("idMatch") Integer idMatch, @PathVariable("idTeam") Integer idTeam,
-			@PathVariable("usernamePlayer") String usernamePlayer) {
+	@GetMapping("/team/match/{idMatch}/player/{usernamePlayer}/convocar")
+	@PreAuthorize("hasRole('COACH')")
+	public ResponseEntity<Matches> convocar(@PathVariable("idMatch") Integer idMatch,@PathVariable("usernamePlayer") String usernamePlayer) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
-		Team t = teamService.findById(idTeam);
-		if (t != null) {
-			if (t.getCoach().getUsername().equals(username)) {
-				Matches m = matchesService.findById(idMatch);
-				Player p = playerService.findByUsername(usernamePlayer);
-				if (p != null && m != null) {
+		Coach c = this.coachService.findByUsername(username);
+		if (c != null) {
+			Player p = playerService.findByUsername(usernamePlayer);
+			Matches m = matchesService.findById(idMatch);
+			if (p != null && m != null) {
 					m.getPlayersConovated().add(p.getUsername());
 					this.matchesService.saveMatch(m);
 					return ResponseEntity.ok().build();
@@ -205,14 +243,12 @@ public class MatchesController {
 			} else {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 			}
-		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
 	
-	@GetMapping("/match/{idMatch}/player/{usernamePlayer}/desconvocar")
+	@GetMapping("/team/match/{idMatch}/player/{usernamePlayer}/desconvocar")
 	@PreAuthorize("hasRole('COACH')")
-	public ResponseEntity<Matches> desconvocar(@PathVariable("idMatch") Integer idMatch, @PathVariable("idTeam") Integer idTeam,
-			@PathVariable("usernamePlayer") String usernamePlayer) {
+	public ResponseEntity<Matches> desconvocar(@PathVariable("idMatch") Integer idMatch, @PathVariable("usernamePlayer") String usernamePlayer) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		Coach c = this.coachService.findByUsername(username);
@@ -252,15 +288,61 @@ public class MatchesController {
 		}
 	}
 	
-	@GetMapping("/match/convocate/{matchId}")
+	/**
+	 * 
+	 * @param idMatch
+	 * @return Devuelve los jugadores disponibles para convocar por parte del equipo.
+	 */
+	
+	@GetMapping("/match/convocate/{idMatch}")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<List<Player>> getPlayersConvocated(){ 
+	public ResponseEntity<List<Player>> getPlayersToConvocate(@PathVariable("idMatch") Integer idMatch){ 
+			UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			String username = ud.getUsername();
+			Coach c = this.coachService.findByUsername(username);
+			if (c != null) {
+				Matches m = this.matchesService.findById(idMatch);
+				List<Player> allPlayers = c.getTeam().getPlayers().stream().collect(Collectors.toList());
+				List<Player> playersConvocated = new ArrayList<>();
+				m.getPlayersConovated().stream().forEach(
+					x -> playersConvocated.add(this.playerService.findByUsername(x)));
+				List<Player> res = new ArrayList<>();
+				allPlayers.stream().forEach(
+						data -> { 
+							if(!playersConvocated.contains(data)) {
+								res.add(data);
+							}
+						}
+				);				
+				return ResponseEntity.ok(res);
+			}
 		
-		
-		
-		return ResponseEntity.ok(new ArrayList<Player>());
+		return ResponseEntity.notFound().build();
 
 	}
+	/**
+	 * 
+	 * @param idMatch
+	 * @return Devuelve los jugadores convocados
+	 */
+	
+	@GetMapping("/match/players/convocated/{idMatch}")
+	@PreAuthorize("permitAll()")
+	public ResponseEntity<List<Player>> getPlayersConvocated(@PathVariable("idMatch") Integer idMatch){ 
+		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String username = ud.getUsername();
+		Coach c = this.coachService.findByUsername(username);
+		if (c != null) {
+			Matches m = this.matchesService.findById(idMatch);
+			List<Player> playersConvocated = new ArrayList<>();
+			m.getPlayersConovated().stream().forEach(
+				x -> playersConvocated.add(this.playerService.findByUsername(x)));
+			return ResponseEntity.ok(playersConvocated);
+		}
+		return ResponseEntity.notFound().build();
+	}
+	
+	
 	
 
 }

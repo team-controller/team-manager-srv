@@ -1,11 +1,15 @@
 package com.cbd.teamcontroller.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,6 +29,7 @@ import com.cbd.teamcontroller.model.Team;
 import com.cbd.teamcontroller.model.User;
 import com.cbd.teamcontroller.model.mapper.UserDataMapper;
 import com.cbd.teamcontroller.model.utils.RoleType;
+import com.cbd.teamcontroller.service.PlayerService;
 import com.cbd.teamcontroller.service.TeamService;
 import com.cbd.teamcontroller.service.UserService;
 
@@ -45,6 +50,10 @@ public class AuthController {
 	@Autowired
 	TeamService teamService;
 	
+	@Autowired
+	PlayerService playerService;
+	
+	
 	@PostMapping("/signin")
 	public ResponseEntity<LoginResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 		var authentication = authenticationManager.authenticate(
@@ -52,10 +61,14 @@ public class AuthController {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		var userDetails = (User) authentication.getPrincipal();
+		List<String> authorities = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+				.collect(Collectors.toList());
 		Team team = null;
-		Team t = teamService.findTeamByCoachUsername(userDetails.getUsername());
-		if(t != null) {
-			team = t;
+		if(authorities.contains("ROLE_COACH")) {
+			team = teamService.findTeamByCoachUsername(userDetails.getUsername());	
+		}else {
+			Player p = this.playerService.findByUsername(userDetails.getUsername());
+			team = p.getTeam();
 		}
 		return ResponseEntity.ok(new LoginResponse(jwt, userDetails.getUsername(), userDetails.getFechaNacimiento(), userDetails.getFirstName(), userDetails.getSecondName(), userDetails.getRol().getName(),team));
 	
@@ -74,7 +87,7 @@ public class AuthController {
 		return ResponseEntity.ok(new MessageResponse("El usuario ha quedado registrado correctamente"));
 	}
 	
-    private User generateUserWithRole(UserDataMapper userData) {
+    public User generateUserWithRole(UserDataMapper userData) {
         
     	if (userData.getRol().equals(RoleType.ROLE_COACH)) {
             return new Coach(userData);

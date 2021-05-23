@@ -1,5 +1,8 @@
 package com.cbd.teamcontroller.controller;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,14 +24,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cbd.teamcontroller.model.Coach;
+import com.cbd.teamcontroller.model.Matches;
 import com.cbd.teamcontroller.model.Player;
 import com.cbd.teamcontroller.model.Team;
 import com.cbd.teamcontroller.model.dtos.PlayerDTO;
 import com.cbd.teamcontroller.model.mapper.UserDataMapper;
-import com.cbd.teamcontroller.service.CoachService;
 import com.cbd.teamcontroller.service.PlayerService;
 import com.cbd.teamcontroller.service.TeamService;
+import com.cbd.teamcontroller.service.UserService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -41,38 +45,37 @@ public class PlayerController {
 	private PlayerService playerService;
 	
 	@Autowired
-	private CoachService coachService;
+	private UserService userService;
+	
+    @Autowired
+    private PasswordEncoder encoder;
+    
+	static class SortByPosition implements Comparator<Player> {
+        @Override
+        public int compare(Player a, Player b) {
+            return a.getPosition().compareTo(b.getPosition());
+        }
+	
+	}
 
 	@GetMapping("/team/{idTeam}/players")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<Set<Player>> getPlayersTeam(@PathVariable("idTeam") Integer idTeam) {
+	public ResponseEntity<List<Player>> getPlayersTeam(@PathVariable("idTeam") Integer idTeam) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 		Team t = teamService.findById(idTeam);
 		if (t != null) {
 			List<String> namesPlayers = t.getPlayers().stream().map(x -> x.getUsername()).collect(Collectors.toList());
 			if (username.equals(t.getCoach().getUsername()) || namesPlayers.contains(username)) {
-				return ResponseEntity.ok(t.getPlayers());
+				List<Player> res = new ArrayList<Player>(t.getPlayers());
+				Collections.sort(res, new SortByPosition());
+				return ResponseEntity.ok(res);
 			} else {
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 			}
 		}
 		return ResponseEntity.notFound().build();
 	}
-	
-	@GetMapping("/team/playersByCoach")
-	@PreAuthorize("permitAll()")
-	public ResponseEntity<Set<Player>> getPlayersByCoach() {
-		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		String username = ud.getUsername();
-		Coach c = this.coachService.findByUsername(username);
-		if (c != null) {
-			List<String> namesPlayers = c.getTeam().getPlayers().stream().map(x -> x.getUsername()).collect(Collectors.toList());
-				return ResponseEntity.ok(c.getTeam().getPlayers());
-		}
-		return ResponseEntity.notFound().build();
-	}
-	
 	
 	@GetMapping("/team/{idTeam}/player/{usernamePlayer}")
 	@PreAuthorize("permitAll()")
@@ -84,7 +87,7 @@ public class PlayerController {
 		if (t != null) {
 			List<String> namesPlayers = t.getPlayers().stream().map(x -> x.getUsername()).collect(Collectors.toList());
 			if (username.equals(t.getCoach().getUsername()) || namesPlayers.contains(username)) {
-				Player p = playerService.findByUsername(usernamePlayer);
+				Player p = (Player) this.userService.findUserByUserName(usernamePlayer);
 				if (p != null) {
 					String date = p.getFechaNacimiento();
 					String[] element = date.split(" ");
@@ -111,6 +114,7 @@ public class PlayerController {
 			if (t.getCoach().getUsername().equals(username)) {
 				Player p = new Player(user);
 				p.setTeam(t);
+				p.setPassword(this.encoder.encode(user.getPassword()));
 				p.setPosition(posicion);
 				playerService.save(p);
 				t.getPlayers().add(p);

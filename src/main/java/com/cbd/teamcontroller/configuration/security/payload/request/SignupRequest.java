@@ -9,6 +9,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.cbd.teamcontroller.model.mapper.UserDataMapper;
+import com.cbd.teamcontroller.model.utils.RoleType;
+
 @Getter
 @Setter
 public class SignupRequest {
@@ -36,5 +39,19 @@ public class SignupRequest {
 
     @Pattern(regexp = "^[+]*[(]?[0-9]{1,4}[)]?[-\\s\\./0-9]*$", message = "Must be a valid phone number")
     private String phoneNumber;
+    
+    
+    public SignupRequest() { 
+    	
+    }
+    public SignupRequest(UserDataMapper user) { 
+    	this.username = user.getUsername();
+    	this.password = user.getPassword();
+    	this.role = user.getRol().getName();
+    	this.fechaNacimiento = user.getFechaNacimiento();
+    	this.firstName = user.getFirstName();
+    	this.secondName = user.getSecondName();
+    	this.phoneNumber = user.getPhoneNumber();
+    }
 
 }
