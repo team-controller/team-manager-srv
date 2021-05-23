@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cbd.teamcontroller.model.Matches;
 import com.cbd.teamcontroller.model.Player;
 import com.cbd.teamcontroller.model.Team;
 import com.cbd.teamcontroller.model.dtos.PlayerDTO;
@@ -144,7 +142,7 @@ public class PlayerController {
 				Player p = playerService.findByUsername(usernamePlayer);
 				if (p != null) {
 					String date = res.getFechaNacimiento();
-					String[] element = date.split(" ");
+					String[] element = date.split("T");
 					String finalDate = element[0].replace("-", "/");
 					res.setFechaNacimiento(finalDate);
 					Player p1 = p;
