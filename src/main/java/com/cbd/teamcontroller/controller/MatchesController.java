@@ -68,13 +68,13 @@ public class MatchesController {
 	
 	}
 
-	@GetMapping("/matches")
+	@GetMapping("/matches/{idTeam}")
 	@PreAuthorize("permitAll()")
-	public ResponseEntity<List<Matches>> getAllMatchesByTeam() {
+	public ResponseEntity<List<Matches>> getAllMatchesByTeam(@PathVariable("idTeam") Integer idTeam) {
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
 
-		Team t = this.teamService.findTeamByCoachUsername(username);
+		Team t = this.teamService.findById(idTeam);
 		if(t != null) {
 			List<Matches> matches  = t.getMatches().stream().collect(Collectors.toList());
 			Collections.sort(matches, new SortByDate());
@@ -331,13 +331,30 @@ public class MatchesController {
 	public ResponseEntity<List<Player>> getPlayersConvocated(@PathVariable("idMatch") Integer idMatch){ 
 		UserDetails ud = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = ud.getUsername();
-		Coach c = this.coachService.findByUsername(username);
-		if (c != null) {
-			Matches m = this.matchesService.findById(idMatch);
-			List<Player> playersConvocated = new ArrayList<>();
-			m.getPlayersConovated().stream().forEach(
-				x -> playersConvocated.add(this.playerService.findByUsername(x)));
-			return ResponseEntity.ok(playersConvocated);
+		List<String> authorities = ud.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+				.collect(Collectors.toList());
+		if(authorities.contains("ROLE_COACH")) {
+			Coach c = this.coachService.findByUsername(username);
+			if (c != null) {
+				Matches m = this.matchesService.findById(idMatch);
+				List<Player> playersConvocated = new ArrayList<>();
+				m.getPlayersConovated().stream().forEach(
+						x -> playersConvocated.add(this.playerService.findByUsername(x)));
+				return ResponseEntity.ok(playersConvocated);
+			}
+		}else if(authorities.contains("ROLE_PLAYER")){ 
+			Player p = this.playerService.findByUsername(username);
+			List<Team> teams = teamService.findAll();
+			if (!teams.isEmpty()) {
+				Team t = teams.stream().filter(x -> x.getPlayers().contains(p)).findFirst().get();
+				Matches match = t.getMatches().stream().filter(x -> x.getId().equals(idMatch)).findFirst().get();
+				List<Player> playersConvocated = new ArrayList<>();
+				match.getPlayersConovated().stream().forEach(
+						x -> playersConvocated.add(this.playerService.findByUsername(x)));
+				return ResponseEntity.ok(playersConvocated);
+			} else {
+				return ResponseEntity.notFound().build();
+			}
 		}
 		return ResponseEntity.notFound().build();
 	}
